@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PC Monitor - Text Based</title>
+    <style>
+        body {
+            background-color: black;
+            color: #00ff00;  /* Classic terminal green color */
+            font-family: monospace;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        .monitor-section {
+            margin: 20px 0;
+            border: 1px solid #00ff00;
+            padding: 10px;
+        }
+        .command-input {
+            background-color: black;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 5px;
+            width: 100%;
+            font-family: monospace;
+        }
+        .output-line {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <pre>
+=================================
+   PC MONITORING SYSTEM v1.0
+=================================
+    </pre>
+
+    <div class="monitor-section">
+        <div class="output-line">SYSTEM TEMPERATURE:</div>
+        <div id="cpu-temp" class="output-line">CPU Temperature: -- °C</div>
+        <div id="gpu-temp" class="output-line">GPU Temperature: -- °C</div>
+    </div>
+
+    <div class="monitor-section">
+        <div class="output-line">RGB CONTROL:</div>
+        <div class="output-line">Current RGB Values:</div>
+        <div id="rgb-values" class="output-line">R: 0 | G: 0 | B: 0</div>
+    </div>
+
+    <div class="monitor-section">
+        <div class="output-line">COMMANDS:</div>
+        <div class="output-line">Type 'help' for available commands</div>
+        <input type="text" id="command-input" class="command-input" placeholder="Enter command...">
+    </div>
+
+    <div id="output-log" class="monitor-section">
+        <div class="output-line">System initialized...</div>
+    </div>
+
+    <script>
+        // Simulated temperature values (in a real application, these would come from hardware sensors)
+        let cpuTemp = 45;
+        let gpuTemp = 65;
+        let rgbValues = { r: 0, g: 0, b: 0 };
+
+        // Command input handling
+        const commandInput = document.getElementById('command-input');
+        const outputLog = document.getElementById('output-log');
+
+        function updateTemperatures() {
+            // Simulate temperature fluctuation
+            cpuTemp += Math.random() * 2 - 1;
+            gpuTemp += Math.random() * 2 - 1;
+            
+            document.getElementById('cpu-temp').textContent = `CPU Temperature: ${cpuTemp.toFixed(1)} °C`;
+            document.getElementById('gpu-temp').textContent = `GPU Temperature: ${gpuTemp.toFixed(1)} °C`;
+        }
+
+        function updateRGB() {
+            document.getElementById('rgb-values').textContent = 
+                `R: ${rgbValues.r} | G: ${rgbValues.g} | B: ${rgbValues.b}`;
+        }
+
+        function logOutput(message) {
+            const line = document.createElement('div');
+            line.className = 'output-line';
+            line.textContent = `> ${message}`;
+            outputLog.insertBefore(line, outputLog.firstChild);
+        }
+
+        function processCommand(command) {
+            const cmd = command.toLowerCase().trim();
+            const parts = cmd.split(' ');
+
+            switch(parts[0]) {
+                case 'help':
+                    logOutput('Available commands:');
+                    logOutput('  help - Show this help message');
+                    logOutput('  temp - Show current temperatures');
+                    logOutput('  rgb <r> <g> <b> - Set RGB values (0-255)');
+                    logOutput('  clear - Clear output log');
+                    break;
+
+                case 'temp':
+                    logOutput(`CPU: ${cpuTemp.toFixed(1)}°C | GPU: ${gpuTemp.toFixed(1)}°C`);
+                    break;
+
+                case 'rgb':
+                    if (parts.length === 4) {
+                        const r = parseInt(parts[1]);
+                        const g = parseInt(parts[2]);
+                        const b = parseInt(parts[3]);
+                        
+                        if (isNaN(r) || isNaN(g) || isNaN(b) || 
+                            r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
+                            logOutput('Error: RGB values must be between 0 and 255');
+                        } else {
+                            rgbValues = { r, g, b };
+                            updateRGB();
+                            logOutput(`RGB values set to R:${r} G:${g} B:${b}`);
+                        }
+                    } else {
+                        logOutput('Usage: rgb <r> <g> <b> (values 0-255)');
+                    }
+                    break;
+
+                case 'clear':
+                    outputLog.innerHTML = '';
+                    logOutput('Output cleared');
+                    break;
+
+                default:
+                    logOutput('Unknown command. Type "help" for available commands');
+            }
+        }
+
+        // Event listeners
+        commandInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const command = this.value;
+                logOutput(command);
+                processCommand(command);
+                this.value = '';
+            }
+        });
+
+        // Update temperatures periodically
+        setInterval(updateTemperatures, 2000);
+
+        // Initial updates
+        updateTemperatures();
+        updateRGB();
+    </script>
+</body>
+</html> 
